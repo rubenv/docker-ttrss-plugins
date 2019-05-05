@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+#!/usr/bin/env php7
 <?php
 
 $confpath = '/var/www/config.php';
