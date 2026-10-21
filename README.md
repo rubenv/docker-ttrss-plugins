@@ -1,6 +1,6 @@
 # TT-RSS with the Feedly theme
 
-A thin extension of the maintained [`ghcr.io/tt-rss/tt-rss:latest`](https://github.com/tt-rss/tt-rss) image. Upstream currently uses **Alpine 3.24.2 and PHP 8.5** and publishes TT-RSS as rolling releases rather than numbered releases. The Feedly theme is included; Fever is no longer installed.
+A thin extension of the maintained [`ghcr.io/tt-rss/tt-rss:latest`](https://github.com/tt-rss/tt-rss) image. Upstream currently uses **Alpine 3.24.2 and PHP 8.5** and publishes TT-RSS as rolling releases rather than numbered releases. The Feedly theme and `googlereaderkeys` plugin are included; Fever is no longer installed.
 
 ## Build and publish
 
@@ -27,7 +27,7 @@ docker compose build --pull
 docker compose up -d
 ```
 
-Open <http://localhost:8280/tt-rss/> (or your configured URL). The default login is `admin`; if `ADMIN_USER_PASS` is unset, find the generated initial password with `docker compose logs app`. Select Feedly in TT-RSS preferences to use the theme.
+Open <http://localhost:8280/tt-rss/> (or your configured URL). The default login is `admin`; if `ADMIN_USER_PASS` is unset, find the generated initial password with `docker compose logs app`. Select Feedly in TT-RSS preferences to use the theme. Enable **googlereaderkeys** under **Preferences → Plugins** for Google Reader-style shortcuts, including j/k article navigation.
 
 Compose runs PostgreSQL, the app (PHP-FPM), the feed updater, and upstream nginx separately. The app and web services share the `app-data` volume; the database persists in `db-data`. Upstream initializes and migrates the schema on app startup. Only nginx is published to the host.
 
