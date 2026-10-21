@@ -1,0 +1,58 @@
+x-app: &app
+  image: docker-ttrss-plugins:local
+  build: .
+  restart: unless-stopped
+  environment: &app-environment
+    TTRSS_DB_HOST: db
+    TTRSS_DB_PORT: 5432
+    TTRSS_DB_NAME: ${TTRSS_DB_NAME:-ttrss}
+    TTRSS_DB_USER: ${TTRSS_DB_USER:-ttrss}
+    TTRSS_DB_PASS: ${TTRSS_DB_PASS:?Set TTRSS_DB_PASS in .env}
+    TTRSS_SELF_URL_PATH: ${TTRSS_SELF_URL_PATH:-http://localhost:8280/tt-rss/}
+  volumes:
+    - app-data:/var/www/html
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${TTRSS_DB_NAME:-ttrss}
+      POSTGRES_USER: ${TTRSS_DB_USER:-ttrss}
+      POSTGRES_PASSWORD: ${TTRSS_DB_PASS:?Set TTRSS_DB_PASS in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    <<: *app
+    environment:
+      <<: *app-environment
+      ADMIN_USER_PASS: ${ADMIN_USER_PASS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  updater:
+    <<: *app
+    command: /opt/tt-rss/updater.sh
+    depends_on:
+      - app
+
+  web-nginx:
+    image: ghcr.io/tt-rss/tt-rss-web-nginx:latest
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8280}:80"
+    volumes:
+      - app-data:/var/www/html:ro
+    depends_on:
+      - app
+
+volumes:
+  app-data:
+  db-data:
