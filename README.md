@@ -2,6 +2,22 @@
 
 A thin extension of the maintained [`ghcr.io/tt-rss/tt-rss:latest`](https://github.com/tt-rss/tt-rss) image. Upstream currently uses **Alpine 3.24.2 and PHP 8.5** and publishes TT-RSS as rolling releases rather than numbered releases. The Feedly theme is included; Fever is no longer installed.
 
+## Build and publish
+
+The image repository is configured in `.envrc` and loaded by direnv, not hardcoded in the Makefile.
+
+```sh
+direnv allow                         # load IMAGE from .envrc
+make build                           # registry.rocketeer.be/ttrss:latest
+# Authenticate once if needed:
+podman login registry.rocketeer.be
+make push                            # builds, then pushes
+```
+
+Use `make push TAG=<version>` to publish a specific tag. `IMAGE` and `PODMAN` are also overridable. Pass extra build options with, for example, `make push BUILD_ARGS="--no-cache --build-arg FEEDLY_REF=<commit>"`.
+
+The Kubernetes chart in `Rocketeer/server/charts/ttrss` uses `registry.rocketeer.be/ttrss:latest`. If publishing a versioned tag, set its `imageTag` when deploying.
+
 ## Run
 
 ```sh
